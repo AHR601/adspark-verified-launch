@@ -377,7 +377,7 @@ const Verification = ({ onComplete, onCancel }: VerificationProps) => {
                 License
               </TabsTrigger>
               <TabsTrigger value="website" className="flex items-center justify-center gap-2">
-                <Globe size={16} className="hidden md:inline" />
+                <Globe width={16} height={16} className="hidden md:inline" />
                 Website
               </TabsTrigger>
               <TabsTrigger value="address" className="flex items-center justify-center gap-2">
