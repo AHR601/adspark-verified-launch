@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle, ChevronLeft, ChevronRight, ArrowLeft, Phone, MousePointer, Store, Percent, Globe } from "lucide-react";
+import { AlertCircle, ChevronLeft, ChevronRight, ArrowLeft, Phone, MousePointer, Store, Percent, Globe, Film, Image, Monitor } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import KeywordSelector from "@/components/KeywordSelector";
@@ -25,12 +25,18 @@ const AdWizard = ({ onComplete, onCancel }: AdWizardProps) => {
     businessName: "",
     businessWebsite: "",
     businessType: "",
+    adType: "text", // default ad type
     goal: "",
     headline: "",
     description: "",
     selectedTemplate: "",
     keywords: [] as string[],
     dailyBudget: 20,
+    videoUrl: "", // for video ads
+    displayImage: "", // for display ads
+    brandLogo: "", // for brand ads
+    brandColors: "", // for brand ads
+    brandMessage: "", // for brand ads
   });
 
   // For controlling form validation at each step
@@ -49,14 +55,26 @@ const AdWizard = ({ onComplete, onCancel }: AdWizardProps) => {
           newErrors.businessWebsite = "Please enter a valid website";
         }
         if (!adData.businessType) newErrors.businessType = "Business type is required";
+        if (!adData.adType) newErrors.adType = "Ad type is required";
         break;
       case 2:
         if (!adData.goal) newErrors.goal = "Please select a goal";
         break;
       case 3:
-        if (adData.selectedTemplate) break; // If template selected, no validation needed
-        if (!adData.headline) newErrors.headline = "Headline is required";
-        if (!adData.description) newErrors.description = "Description is required";
+        if (adData.adType === "text") {
+          if (adData.selectedTemplate) break; // If template selected, no validation needed
+          if (!adData.headline) newErrors.headline = "Headline is required";
+          if (!adData.description) newErrors.description = "Description is required";
+        } else if (adData.adType === "video") {
+          if (!adData.videoUrl) newErrors.videoUrl = "Video URL is required";
+          if (!adData.headline) newErrors.headline = "Headline is required";
+        } else if (adData.adType === "display") {
+          if (!adData.displayImage) newErrors.displayImage = "Display image is required";
+          if (!adData.headline) newErrors.headline = "Headline is required";
+        } else if (adData.adType === "brand") {
+          if (!adData.brandLogo) newErrors.brandLogo = "Brand logo is required";
+          if (!adData.brandMessage) newErrors.brandMessage = "Brand message is required";
+        }
         break;
       case 4:
         if (adData.keywords.length === 0) newErrors.keywords = "Please select at least one keyword";
@@ -194,6 +212,68 @@ const AdWizard = ({ onComplete, onCancel }: AdWizardProps) => {
               </Select>
               {errors.businessType && <p className="text-sm text-red-500">{errors.businessType}</p>}
             </div>
+            
+            <div className="space-y-3">
+              <Label>Ad Type<span className="text-red-500">*</span></Label>
+              <RadioGroup 
+                value={adData.adType}
+                onValueChange={(value) => handleChanges("adType", value)}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2"
+              >
+                <div className={`flex items-center space-x-3 rounded-lg border p-4 cursor-pointer ${adData.adType === "text" ? "border-primary bg-accent" : ""}`}>
+                  <RadioGroupItem value="text" id="ad-text" />
+                  <Label htmlFor="ad-text" className="cursor-pointer flex items-center space-x-4">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Globe size={20} className="text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-medium">Text Ad</div>
+                      <div className="text-sm text-muted-foreground">Standard text-based search ads</div>
+                    </div>
+                  </Label>
+                </div>
+                
+                <div className={`flex items-center space-x-3 rounded-lg border p-4 cursor-pointer ${adData.adType === "video" ? "border-primary bg-accent" : ""}`}>
+                  <RadioGroupItem value="video" id="ad-video" />
+                  <Label htmlFor="ad-video" className="cursor-pointer flex items-center space-x-4">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Film size={20} className="text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-medium">Video Ad</div>
+                      <div className="text-sm text-muted-foreground">Engage with video content</div>
+                    </div>
+                  </Label>
+                </div>
+                
+                <div className={`flex items-center space-x-3 rounded-lg border p-4 cursor-pointer ${adData.adType === "display" ? "border-primary bg-accent" : ""}`}>
+                  <RadioGroupItem value="display" id="ad-display" />
+                  <Label htmlFor="ad-display" className="cursor-pointer flex items-center space-x-4">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Image size={20} className="text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-medium">Display Ad</div>
+                      <div className="text-sm text-muted-foreground">Visual banner advertisements</div>
+                    </div>
+                  </Label>
+                </div>
+                
+                <div className={`flex items-center space-x-3 rounded-lg border p-4 cursor-pointer ${adData.adType === "brand" ? "border-primary bg-accent" : ""}`}>
+                  <RadioGroupItem value="brand" id="ad-brand" />
+                  <Label htmlFor="ad-brand" className="cursor-pointer flex items-center space-x-4">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Monitor size={20} className="text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-medium">Brand Ad</div>
+                      <div className="text-sm text-muted-foreground">Boost your brand awareness</div>
+                    </div>
+                  </Label>
+                </div>
+              </RadioGroup>
+              {errors.adType && <p className="text-sm text-red-500">{errors.adType}</p>}
+            </div>
           </div>
         );
         
@@ -275,63 +355,153 @@ const AdWizard = ({ onComplete, onCancel }: AdWizardProps) => {
                 <Label>Write your ad copy<span className="text-red-500">*</span></Label>
                 <Badge variant="outline" className="ml-auto">Step 3 of 5</Badge>
               </div>
-              <p className="text-sm text-muted-foreground">Create compelling ad text or choose from our templates</p>
+              <p className="text-sm text-muted-foreground">
+                {adData.adType === "text" ? "Create compelling ad text or choose from our templates" :
+                 adData.adType === "video" ? "Add your video URL and headline" :
+                 adData.adType === "display" ? "Upload your display image and add headline" :
+                 "Create your brand advertisement"}
+              </p>
               
-              <div className="bg-muted p-4 rounded-lg mb-6">
-                <h4 className="font-medium mb-3 text-sm">Choose a template (optional)</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {adTemplates.map(template => {
-                    const isSelected = adData.selectedTemplate === template.id;
-                    return (
-                      <div 
-                        key={template.id}
-                        className={`p-3 border rounded-md cursor-pointer hover:bg-accent relative ${isSelected ? "border-primary bg-accent" : ""}`}
-                        onClick={() => selectTemplate(template)}
-                      >
-                        <div className="font-medium text-sm">{template.headline.replace('[Business Type]', adData.businessType || '[Business Type]')}</div>
-                        <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{template.description.replace('[Business Type]', adData.businessType || '[Business Type]')}</div>
-                        {isSelected && (
-                          <div className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full"></div>
-                        )}
+              {adData.adType === "text" && (
+                <div className="bg-muted p-4 rounded-lg mb-6">
+                  <h4 className="font-medium mb-3 text-sm">Choose a template (optional)</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {adTemplates.map(template => {
+                      const isSelected = adData.selectedTemplate === template.id;
+                      return (
+                        <div 
+                          key={template.id}
+                          className={`p-3 border rounded-md cursor-pointer hover:bg-accent relative ${isSelected ? "border-primary bg-accent" : ""}`}
+                          onClick={() => selectTemplate(template)}
+                        >
+                          <div className="font-medium text-sm">{template.headline.replace('[Business Type]', adData.businessType || '[Business Type]')}</div>
+                          <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{template.description.replace('[Business Type]', adData.businessType || '[Business Type]')}</div>
+                          {isSelected && (
+                            <div className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full"></div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              
+              {adData.adType === "video" && (
+                <div className="space-y-4 mb-4">
+                  <div>
+                    <Label htmlFor="videoUrl">Video URL<span className="text-red-500">*</span></Label>
+                    <Input
+                      id="videoUrl"
+                      placeholder="e.g., https://www.youtube.com/watch?v=abcdef123456"
+                      value={adData.videoUrl}
+                      onChange={(e) => handleChanges("videoUrl", e.target.value)}
+                      className={`mt-1 ${errors.videoUrl ? "border-red-500" : ""}`}
+                    />
+                    {errors.videoUrl && <p className="text-xs text-red-500">{errors.videoUrl}</p>}
+                    <p className="text-xs text-muted-foreground mt-1">YouTube, Vimeo, or other video hosting links</p>
+                  </div>
+                </div>
+              )}
+              
+              {adData.adType === "display" && (
+                <div className="space-y-4 mb-4">
+                  <div>
+                    <Label htmlFor="displayImage">Display Image URL<span className="text-red-500">*</span></Label>
+                    <Input
+                      id="displayImage"
+                      placeholder="e.g., https://example.com/your-banner-image.jpg"
+                      value={adData.displayImage}
+                      onChange={(e) => handleChanges("displayImage", e.target.value)}
+                      className={`mt-1 ${errors.displayImage ? "border-red-500" : ""}`}
+                    />
+                    {errors.displayImage && <p className="text-xs text-red-500">{errors.displayImage}</p>}
+                    <p className="text-xs text-muted-foreground mt-1">Recommended size: 1200x628 pixels</p>
+                  </div>
+                </div>
+              )}
+              
+              {adData.adType === "brand" && (
+                <div className="space-y-4 mb-4">
+                  <div>
+                    <Label htmlFor="brandLogo">Brand Logo URL<span className="text-red-500">*</span></Label>
+                    <Input
+                      id="brandLogo"
+                      placeholder="e.g., https://example.com/your-logo.png"
+                      value={adData.brandLogo}
+                      onChange={(e) => handleChanges("brandLogo", e.target.value)}
+                      className={`mt-1 ${errors.brandLogo ? "border-red-500" : ""}`}
+                    />
+                    {errors.brandLogo && <p className="text-xs text-red-500">{errors.brandLogo}</p>}
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="brandColors">Brand Colors (optional)</Label>
+                    <Input
+                      id="brandColors"
+                      placeholder="e.g., #FF0000, #00FF00"
+                      value={adData.brandColors}
+                      onChange={(e) => handleChanges("brandColors", e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Comma separated hex color codes</p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="brandMessage">Brand Message<span className="text-red-500">*</span></Label>
+                    <Textarea
+                      id="brandMessage"
+                      placeholder="Your brand's key message"
+                      value={adData.brandMessage}
+                      onChange={(e) => handleChanges("brandMessage", e.target.value)}
+                      className={`mt-1 ${errors.brandMessage ? "border-red-500" : ""}`}
+                      maxLength={150}
+                    />
+                    <div className="flex justify-between mt-1">
+                      <span className="text-xs text-red-500">{errors.brandMessage}</span>
+                      <span className="text-xs text-muted-foreground">{adData.brandMessage?.length || 0}/150</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Always show headline field except for brand ads */}
+              {adData.adType !== "brand" && (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="headline">Ad Headline<span className="text-red-500">*</span></Label>
+                    <Input
+                      id="headline"
+                      placeholder="e.g., Professional Plumbing Services in Your Area"
+                      value={adData.headline}
+                      onChange={(e) => handleChanges("headline", e.target.value)}
+                      className={`mt-1 ${errors.headline ? "border-red-500" : ""}`}
+                      maxLength={30}
+                    />
+                    <div className="flex justify-between mt-1">
+                      <span className="text-xs text-red-500">{errors.headline}</span>
+                      <span className="text-xs text-muted-foreground">{adData.headline?.length || 0}/30</span>
+                    </div>
+                  </div>
+                  
+                  {/* Only show description for text ads */}
+                  {adData.adType === "text" && (
+                    <div>
+                      <Label htmlFor="description">Ad Description<span className="text-red-500">*</span></Label>
+                      <Textarea
+                        id="description"
+                        placeholder="Describe your services, special offers, or unique selling points"
+                        value={adData.description}
+                        onChange={(e) => handleChanges("description", e.target.value)}
+                        className={`mt-1 ${errors.description ? "border-red-500" : ""}`}
+                        maxLength={90}
+                      />
+                      <div className="flex justify-between mt-1">
+                        <span className="text-xs text-red-500">{errors.description}</span>
+                        <span className="text-xs text-muted-foreground">{adData.description?.length || 0}/90</span>
                       </div>
-                    );
-                  })}
+                    </div>
+                  )}
                 </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="headline">Ad Headline<span className="text-red-500">*</span></Label>
-                  <Input
-                    id="headline"
-                    placeholder="e.g., Professional Plumbing Services in Your Area"
-                    value={adData.headline}
-                    onChange={(e) => handleChanges("headline", e.target.value)}
-                    className={`mt-1 ${errors.headline ? "border-red-500" : ""}`}
-                    maxLength={30}
-                  />
-                  <div className="flex justify-between mt-1">
-                    <span className="text-xs text-red-500">{errors.headline}</span>
-                    <span className="text-xs text-muted-foreground">{adData.headline.length}/30</span>
-                  </div>
-                </div>
-                
-                <div>
-                  <Label htmlFor="description">Ad Description<span className="text-red-500">*</span></Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Describe your services, special offers, or unique selling points"
-                    value={adData.description}
-                    onChange={(e) => handleChanges("description", e.target.value)}
-                    className={`mt-1 ${errors.description ? "border-red-500" : ""}`}
-                    maxLength={90}
-                  />
-                  <div className="flex justify-between mt-1">
-                    <span className="text-xs text-red-500">{errors.description}</span>
-                    <span className="text-xs text-muted-foreground">{adData.description.length}/90</span>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         );
@@ -467,9 +637,9 @@ const AdWizard = ({ onComplete, onCancel }: AdWizardProps) => {
         <CardHeader className="pb-4">
           <CardTitle className="text-2xl">{getStepTitle()}</CardTitle>
           <CardDescription>
-            {currentStep === 1 && "Let's start with some basic information about your business."}
+            {currentStep === 1 && "Let's start with some basic information about your business and choose your ad type."}
             {currentStep === 2 && "What do you want people to do when they see your ad?"}
-            {currentStep === 3 && "Write your ad headline and description, or choose from our templates."}
+            {currentStep === 3 && "Create your ad content based on your selected ad type."}
             {currentStep === 4 && "Pick keywords that will trigger your ad in search results."}
             {currentStep === 5 && "Set a daily budget for your advertising campaign."}
           </CardDescription>
