@@ -1,5 +1,5 @@
 
-import { Globe } from "@/components/ui/globe";
+import Globe from "@/components/ui/globe";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, Phone, Mail, Upload } from "lucide-react";
 import { VerificationMethod } from "@/types/verification";
